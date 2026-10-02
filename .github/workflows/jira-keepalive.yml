@@ -1,0 +1,30 @@
+# Put this file at .github/workflows/jira-keepalive.yml in a PRIVATE repo.
+name: Jira keep-alive
+
+on:
+  schedule:
+    # 09:17 Vietnam time (02:17 UTC) on the 1st and 15th of every month
+    - cron: "17 2 1,15 * *"
+  workflow_dispatch: # lets you run it manually from the Actions tab
+
+jobs:
+  visit-jira:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Visit Jira
+        run: python keepalive.py
+        env:
+          JIRA_SITE: ${{ vars.JIRA_SITE }}
+          JIRA_STORAGE_STATE: ${{ secrets.JIRA_STORAGE_STATE }}
